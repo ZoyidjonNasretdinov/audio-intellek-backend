@@ -8,9 +8,13 @@ async function bootstrap() {
 
   // 🔹 CORS ni yoqish
   app.enableCors({
-    origin: 'http://localhost:8081', // frontend URL
+    origin: [
+      'http://localhost:8081', // main frontend
+      'http://localhost:5173', // admin panel (Vite)
+      'http://localhost:3001',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    credentials: true, // agar cookie yoki auth ishlatilsa
+    credentials: true,
   });
 
   // Global validation

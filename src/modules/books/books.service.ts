@@ -3,12 +3,21 @@ import axios from 'axios';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Book, BookDocument } from './schemas/book.schema';
+import { Category, CategoryDocument } from '../admin/schemas/category.schema';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 
 @Injectable()
 export class BooksService {
-  constructor(@InjectModel(Book.name) private bookModel: Model<BookDocument>) {}
+  constructor(
+    @InjectModel(Book.name) private bookModel: Model<BookDocument>,
+    @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
+  ) {}
+
+  // CATEGORIES
+  async findAllCategories(): Promise<CategoryDocument[]> {
+    return this.categoryModel.find().exec();
+  }
 
   // CREATE
   async create(dto: CreateBookDto): Promise<BookDocument> {
@@ -16,11 +25,21 @@ export class BooksService {
     return book.save();
   }
 
-  // READ ALL (with optional filters: category, grade)
-  async findAll(category?: string, grade?: string): Promise<BookDocument[]> {
-    const filter: Record<string, string> = {};
+  // READ ALL (with optional filters: category, grade, search)
+  async findAll(
+    category?: string,
+    grade?: string,
+    search?: string,
+  ): Promise<BookDocument[]> {
+    const filter: any = {};
     if (category) filter.category = category;
     if (grade) filter.grade = grade;
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { author: { $regex: search, $options: 'i' } },
+      ];
+    }
     return this.bookModel.find(filter).exec();
   }
 

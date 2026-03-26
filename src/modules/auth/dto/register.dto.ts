@@ -29,4 +29,12 @@ export class RegisterDto {
   })
   @IsString()
   grade: string;
+
+  @ApiProperty({
+    example: 'Erkak',
+    description: 'Foydalanuvchi jinsi',
+    enum: ['Erkak', 'Ayol'],
+  })
+  @IsString()
+  gender: string;
 }

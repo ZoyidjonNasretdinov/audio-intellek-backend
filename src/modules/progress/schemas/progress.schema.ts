@@ -16,6 +16,9 @@ export class Progress {
 
   @Prop({ required: true })
   duration: number;
+
+  @Prop({ default: 0 })
+  quizScore: number;
 }
 
 export const ProgressSchema = SchemaFactory.createForClass(Progress);

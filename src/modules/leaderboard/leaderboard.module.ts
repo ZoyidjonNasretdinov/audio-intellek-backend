@@ -14,5 +14,6 @@ import { LeaderboardController } from './leaderboard.controller';
   ],
   controllers: [LeaderboardController],
   providers: [LeaderboardService],
+  exports: [LeaderboardService],
 })
 export class LeaderboardModule {}

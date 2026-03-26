@@ -11,6 +11,7 @@ export interface LeaderboardEntry {
   rank: number;
   userId: string;
   fullName: string;
+  gender: string;
   grade: string;
   totalListeningTime: number;
   booksCompleted: number;
@@ -49,31 +50,42 @@ export class LeaderboardService {
       userMap.set(p.userId, existing);
     }
 
+    // Bulk fetch user info
+    const userIds = Array.from(userMap.keys());
+    const users = await this.usersService.findByIds(userIds);
+    const usersInfoMap = new Map(users.map((u) => [u._id.toString(), u]));
+
     // Enrich with user info and compute score
     const entries: LeaderboardEntry[] = [];
 
-    for (const [userId, stats] of userMap.entries()) {
-      let userInfo: { fullName: string; grade: string } | null = null;
+    // Quiz ballari uchun map
+    const qMap = new Map<string, { totalQuizScore: number }>();
+    for (const p of allProgress) {
+      const entry = qMap.get(p.userId) ?? { totalQuizScore: 0 };
+      entry.totalQuizScore += p.quizScore || 0;
+      qMap.set(p.userId, entry);
+    }
 
-      try {
-        const user = await this.usersService.findById(userId);
-        userInfo = { fullName: user.fullName, grade: user.grade };
-      } catch {
-        // User deleted or not found – skip
-        continue;
-      }
+    for (const [userId, stats] of userMap.entries()) {
+      const user = usersInfoMap.get(userId);
+      if (!user) continue;
 
       // Filter by grade if provided
-      if (grade && userInfo.grade !== grade) continue;
+      if (grade && user.grade !== grade) continue;
 
-      // Score: 1 point per second + 600 point bonus per completed book
-      const score = stats.totalListeningTime + stats.booksCompleted * 600;
+      // Score: 1 point per second + 600 point bonus per completed book + 100 points per correct quiz answer
+      const score = Math.round(
+        stats.totalListeningTime +
+          stats.booksCompleted * 600 +
+          (qMap.get(userId)?.totalQuizScore || 0) * 100,
+      );
 
       entries.push({
         rank: 0, // assigned below
         userId,
-        fullName: userInfo.fullName,
-        grade: userInfo.grade,
+        fullName: user.fullName,
+        gender: user.gender || 'Erkak',
+        grade: user.grade,
         totalListeningTime: stats.totalListeningTime,
         booksCompleted: stats.booksCompleted,
         score,

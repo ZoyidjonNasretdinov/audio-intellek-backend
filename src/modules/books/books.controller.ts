@@ -39,12 +39,21 @@ export class BooksController {
   @ApiOperation({ summary: 'Barcha kitoblarni olish yoki filtrlash' })
   @ApiQuery({ name: 'category', required: false, example: 'Adabiyot' })
   @ApiQuery({ name: 'grade', required: false, example: '10-sinf' })
+  @ApiQuery({ name: 'search', required: false, example: 'Sardor' })
   @ApiResponse({ status: 200, description: 'Kitoblar ro‘yxati.' })
   findAll(
     @Query('category') category?: string,
     @Query('grade') grade?: string,
+    @Query('search') search?: string,
   ) {
-    return this.booksService.findAll(category, grade);
+    return this.booksService.findAll(category, grade, search);
+  }
+
+  @Get('categories')
+  @ApiOperation({ summary: 'Barcha kategoriyalarni olish' })
+  @ApiResponse({ status: 200, description: 'Kategoriyalar ro‘yxati.' })
+  getCategories() {
+    return this.booksService.findAllCategories();
   }
 
   @Get(':id')

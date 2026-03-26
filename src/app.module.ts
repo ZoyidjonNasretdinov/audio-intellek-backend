@@ -11,6 +11,7 @@ import { ProgressModule } from './modules/progress/progress.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { LeaderboardModule } from './modules/leaderboard/leaderboard.module';
 import { BooksModule } from './modules/books/books.module';
+import { QuizzesModule } from './modules/quizzes/quizzes.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { BooksModule } from './modules/books/books.module';
     AdminModule,
     LeaderboardModule,
     BooksModule,
+    QuizzesModule,
   ],
 })
 export class AppModule {}

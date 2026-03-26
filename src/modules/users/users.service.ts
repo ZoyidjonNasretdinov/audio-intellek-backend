@@ -31,6 +31,14 @@ export class UsersService {
     return user;
   }
 
+  async findByIds(ids: string[]) {
+    return this.userModel
+      .find({ _id: { $in: ids } })
+      .select('-password -refreshToken')
+      .lean()
+      .exec();
+  }
+
   async findAll() {
     return this.userModel.find().select('-password -refreshToken').lean();
   }

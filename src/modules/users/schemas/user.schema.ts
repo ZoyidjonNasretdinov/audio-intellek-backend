@@ -22,6 +22,9 @@ export class User {
 
   @Prop({ default: 'USER' })
   role: string;
+
+  @Prop({ default: 'Erkak' })
+  gender: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

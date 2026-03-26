@@ -1,10 +1,14 @@
 import { Controller, Post, Body, Get, Param } from '@nestjs/common';
 import { ProgressService } from './progress.service';
 import { SaveProgressDto } from './dto/save-progress.dto';
+import { LeaderboardService } from '../leaderboard/leaderboard.service';
 
 @Controller('progress')
 export class ProgressController {
-  constructor(private readonly progressService: ProgressService) {}
+  constructor(
+    private readonly progressService: ProgressService,
+    private readonly leaderboardService: LeaderboardService,
+  ) {}
 
   @Post()
   async save(@Body() dto: SaveProgressDto) {
@@ -17,7 +21,10 @@ export class ProgressController {
   }
 
   @Get('user/:userId/book/:bookId')
-  async getOne(@Param('userId') userId: string, @Param('bookId') bookId: string) {
+  async getOne(
+    @Param('userId') userId: string,
+    @Param('bookId') bookId: string,
+  ) {
     return this.progressService.getSingleProgress(userId, bookId);
   }
 
@@ -28,6 +35,22 @@ export class ProgressController {
 
   @Get('leaderboard')
   async leaderboard() {
-    return this.progressService.getLeaderboard();
+    return this.leaderboardService.getLeaderboard();
+  }
+
+  @Get('user/:userId/weekly')
+  async weekly(@Param('userId') userId: string) {
+    return this.progressService.getWeeklyActivity(userId);
+  }
+
+  @Post('quiz')
+  async saveQuiz(
+    @Body() dto: { userId: string; bookId: string; score: number },
+  ) {
+    return this.progressService.saveQuizScore(
+      dto.userId,
+      dto.bookId,
+      dto.score,
+    );
   }
 }
