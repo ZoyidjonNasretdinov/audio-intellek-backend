@@ -38,17 +38,27 @@ export class AdminService {
 
   async getDashboardStats() {
     try {
+      const todayStr = new Date().toISOString().split('T')[0];
+
       const [
         totalUsers,
         totalBooks,
-        totalActivities,
+        activityStats,
         recentUsers,
         popularBooks,
         categoryStats,
       ] = await Promise.all([
         this.userModel.countDocuments(),
         this.bookModel.countDocuments(),
-        this.activityModel.find().lean(),
+        this.activityModel.aggregate([
+          {
+            $group: {
+              _id: null,
+              totalDuration: { $sum: '$duration' },
+              count: { $sum: 1 },
+            },
+          },
+        ]),
         this.userModel
           .find()
           .sort({ createdAt: -1 })
@@ -76,15 +86,11 @@ export class AdminService {
         ]),
       ]);
 
-      // Total listening duration in seconds
-      const totalDuration = totalActivities.reduce(
-        (acc, a) => acc + (a.duration || 0),
-        0,
-      );
+      const { totalDuration = 0, count: totalActivityCount = 0 } =
+        activityStats[0] || {};
+
       const averageListeningHours =
-        totalActivities.length > 0
-          ? totalDuration / totalActivities.length / 3600
-          : 0;
+        totalActivityCount > 0 ? totalDuration / totalActivityCount / 3600 : 0;
 
       // Build category distribution with percentages
       const totalCatBooks = categoryStats.reduce(
@@ -149,10 +155,6 @@ export class AdminService {
       const name = (user.fullName || '').trim().toLowerCase();
       let detectedGender = 'Erkak';
 
-      // O'zbek ismlari uchun oddiy heuristika:
-      // 1. "a" bilan tugasa (Lola, Malika, Nigora)
-      // 2. "ova", "eva" bilan tugasa (familiya)
-      // 3. "qizi" bo'lsa
       if (
         name.endsWith('a') ||
         name.includes('ova') ||
@@ -175,34 +177,39 @@ export class AdminService {
 
   private async getMonthlyStats() {
     const year = new Date().getFullYear();
-    const result: { month: number; totalDuration: number; users: number }[] =
-      [];
+    const startDate = `${year}-01-01`;
+    const endDate = `${year + 1}-01-01`;
 
-    for (let month = 1; month <= 12; month++) {
-      const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
-      const endDate =
-        month === 12
-          ? `${year + 1}-01-01`
-          : `${year}-${String(month + 1).padStart(2, '0')}-01`;
-
-      const [activities, uniqueUsers] = await Promise.all([
-        this.activityModel
-          .find({ date: { $gte: startDate, $lt: endDate } })
-          .lean(),
-        this.activityModel.distinct('userId', {
+    const monthlyData = await this.activityModel.aggregate([
+      {
+        $match: {
           date: { $gte: startDate, $lt: endDate },
-        }),
-      ]);
+        },
+      },
+      {
+        $addFields: {
+          month: { $toLong: { $substr: ['$date', 5, 2] } },
+        },
+      },
+      {
+        $group: {
+          _id: '$month',
+          totalDuration: { $sum: '$duration' },
+          userIds: { $addToSet: '$userId' },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
 
-      result.push({
+    const result = Array.from({ length: 12 }, (_, i) => {
+      const month = i + 1;
+      const data = monthlyData.find((d) => d._id === month);
+      return {
         month,
-        totalDuration: activities.reduce(
-          (acc, a) => acc + (a.duration || 0),
-          0,
-        ),
-        users: uniqueUsers.length,
-      });
-    }
+        totalDuration: data ? data.totalDuration : 0,
+        users: data ? data.userIds.length : 0,
+      };
+    });
 
     return result;
   }

@@ -26,77 +26,82 @@ export class LeaderboardService {
   ) {}
 
   private async buildRankedList(grade?: string): Promise<LeaderboardEntry[]> {
-    const allProgress = await this.progressModel.find().lean().exec();
+    const pipeline: any[] = [
+      {
+        $group: {
+          _id: '$userId',
+          totalListeningTime: { $sum: '$currentTime' },
+          booksCompleted: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $gt: ['$duration', 0] },
+                    { $gte: [{ $divide: ['$currentTime', '$duration'] }, 0.9] },
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+          totalQuizScore: { $sum: { $ifNull: ['$quizScore', 0] } },
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          let: { userId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: [{ $toString: '$_id' }, '$$userId'] },
+              },
+            },
+            { $project: { password: 0, refreshToken: 0 } },
+          ],
+          as: 'user',
+        },
+      },
+      { $unwind: '$user' },
+    ];
 
-    // Group by userId
-    const userMap = new Map<
-      string,
-      { totalListeningTime: number; booksCompleted: number }
-    >();
-
-    for (const p of allProgress) {
-      const existing = userMap.get(p.userId) ?? {
-        totalListeningTime: 0,
-        booksCompleted: 0,
-      };
-
-      existing.totalListeningTime += p.currentTime;
-
-      // Consider a book completed if >= 90% listened
-      if (p.duration > 0 && p.currentTime / p.duration >= 0.9) {
-        existing.booksCompleted += 1;
-      }
-
-      userMap.set(p.userId, existing);
+    if (grade) {
+      pipeline.push({ $match: { 'user.grade': grade } });
     }
 
-    // Bulk fetch user info
-    const userIds = Array.from(userMap.keys());
-    const users = await this.usersService.findByIds(userIds);
-    const usersInfoMap = new Map(users.map((u) => [u._id.toString(), u]));
+    // Score calculation: 1 pt per sec + 600 per book + 100 per quiz point
+    pipeline.push({
+      $addFields: {
+        score: {
+          $round: [
+            {
+              $add: [
+                '$totalListeningTime',
+                { $multiply: ['$booksCompleted', 600] },
+                { $multiply: ['$totalQuizScore', 100] },
+              ],
+            },
+            0,
+          ],
+        },
+      },
+    });
 
-    // Enrich with user info and compute score
-    const entries: LeaderboardEntry[] = [];
+    pipeline.push({ $sort: { score: -1 } });
 
-    // Quiz ballari uchun map
-    const qMap = new Map<string, { totalQuizScore: number }>();
-    for (const p of allProgress) {
-      const entry = qMap.get(p.userId) ?? { totalQuizScore: 0 };
-      entry.totalQuizScore += p.quizScore || 0;
-      qMap.set(p.userId, entry);
-    }
+    const results = await this.progressModel.aggregate(pipeline).exec();
 
-    for (const [userId, stats] of userMap.entries()) {
-      const user = usersInfoMap.get(userId);
-      if (!user) continue;
-
-      // Filter by grade if provided
-      if (grade && user.grade !== grade) continue;
-
-      // Score: 1 point per second + 600 point bonus per completed book + 100 points per correct quiz answer
-      const score = Math.round(
-        stats.totalListeningTime +
-          stats.booksCompleted * 600 +
-          (qMap.get(userId)?.totalQuizScore || 0) * 100,
-      );
-
-      entries.push({
-        rank: 0, // assigned below
-        userId,
-        fullName: user.fullName,
-        gender: user.gender || 'Erkak',
-        grade: user.grade,
-        totalListeningTime: stats.totalListeningTime,
-        booksCompleted: stats.booksCompleted,
-        score,
-      });
-    }
-
-    // Sort by score descending, assign rank
-    entries.sort((a, b) => b.score - a.score);
-    entries.forEach((e, i) => (e.rank = i + 1));
-
-    return entries;
+    return results.map((r, i) => ({
+      rank: i + 1,
+      userId: r._id,
+      fullName: r.user.fullName,
+      gender: r.user.gender || 'Erkak',
+      grade: r.user.grade,
+      totalListeningTime: r.totalListeningTime,
+      booksCompleted: r.booksCompleted,
+      score: r.score,
+    }));
   }
 
   async getLeaderboard(
