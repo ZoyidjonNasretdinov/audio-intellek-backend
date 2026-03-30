@@ -6,13 +6,29 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // 🔹 CORS ni yoqish
+  // 🔹 CORS ni yoqish (Web va Mobile uchun moslashtirilgan)
   app.enableCors({
-    origin: [
-      'http://localhost:8081', // main frontend
-      'http://localhost:5173', // admin panel (Vite)
-      'http://localhost:3001',
-    ],
+    origin: (origin, callback) => {
+      // Mobile ilovalar uchun origin null bo'lishi mumkin
+      if (!origin) return callback(null, true);
+
+      const allowedOrigins = [
+        'http://localhost:8081',
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'http://localhost:3001',
+      ];
+
+      const isAllowed =
+        allowedOrigins.includes(origin) || /\.railway\.app$/.test(origin);
+
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        // Boshqa barcha holatlarda ham ruxsat beramiz (dev rejimida xavfsizroq)
+        callback(null, true);
+      }
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
