@@ -6,15 +6,19 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // 🔹 CORS ni yoqish (Eng keng qamrovli usul)
+  // 🔹 CORS sozlamalari (Vercel va boshqa front-endlar uchun)
   app.enableCors({
-    origin: (origin, callback) => {
-      // Barcha kelayotgan origin'larga ruxsat beramiz
-      callback(null, true);
-    },
+    origin: true, // Barcha originlarga ruxsat beradi (credentials: true bilan mos keladi)
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
-    allowedHeaders: 'Content-Type, Accept, Authorization',
+    allowedHeaders: [
+      'Content-Type',
+      'Accept',
+      'Authorization',
+      'X-Requested-With',
+      'X-HTTP-Method-Override',
+    ],
+    exposedHeaders: ['Set-Cookie'],
   });
 
   // Debug uchun logger (Railway logs'da ko'rinadi)
@@ -47,6 +51,9 @@ async function bootstrap() {
 
   SwaggerModule.setup('docs', app, document);
 
-  await app.listen(3000);
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+  console.log(`Application is running on: http://localhost:${port}`);
+  console.log(`Swagger documentation: http://localhost:${port}/docs`);
 }
 bootstrap();
