@@ -21,6 +21,7 @@ import {
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
+import { Public } from '../../common/decorators/public.decorator';
 
 @ApiTags('Books')
 @Controller('books')
@@ -35,6 +36,7 @@ export class BooksController {
     return this.booksService.create(dto);
   }
 
+  @Public()
   @Get()
   @ApiOperation({ summary: 'Barcha kitoblarni olish yoki filtrlash' })
   @ApiQuery({ name: 'category', required: false, example: 'Adabiyot' })
@@ -49,6 +51,7 @@ export class BooksController {
     return this.booksService.findAll(category, grade, search);
   }
 
+  @Public()
   @Get('categories')
   @ApiOperation({ summary: 'Barcha kategoriyalarni olish' })
   @ApiResponse({ status: 200, description: 'Kategoriyalar ro‘yxati.' })
@@ -56,6 +59,7 @@ export class BooksController {
     return this.booksService.findAllCategories();
   }
 
+  @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Bitta kitobni ID orqali olish' })
   @ApiParam({ name: 'id', example: '65f1234567890abcdef12345' })
@@ -83,6 +87,7 @@ export class BooksController {
     return this.booksService.remove(id);
   }
 
+  @Public()
   @Get(':id/stream')
   @ApiOperation({ summary: 'Kitob audio faylini stream qilish' })
   async streamAudio(

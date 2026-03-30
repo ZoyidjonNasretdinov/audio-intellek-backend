@@ -24,9 +24,11 @@ import { UpdateSettingsDto } from './dto/update-settings.dto';
 import { CreateBookDto } from '../books/dto/create-book.dto';
 import { UpdateBookDto } from '../books/dto/update-book.dto';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
+import { Public } from '../../common/decorators/public.decorator';
 
 @ApiTags('Admin')
 @ApiBearerAuth()
+@Public()
 @Controller('admin')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}

@@ -6,9 +6,23 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // 🔹 CORS sozlamalari (Vercel va boshqa front-endlar uchun)
+  // 🔹 CORS sozlamalari (Admin, Vercel va mobil ilovalar uchun)
   app.enableCors({
-    origin: true, // Barcha originlarga ruxsat beradi (credentials: true bilan mos keladi)
+    origin: (origin, callback) => {
+      // Localhost va Vercel originlariga ruxsat beramiz
+      const allowedOrigins = [
+        /^http:\/\/localhost(:\d+)?$/,
+        /^https:\/\/.*\.vercel\.app$/,
+        /^https:\/\/.*\.railway\.app$/,
+      ];
+      if (!origin || allowedOrigins.some((regex) => regex.test(origin))) {
+        callback(null, true);
+      } else {
+        // Xavfsizlik uchun faqat ruxsat berilganlarni qoldirish ham mumkin,
+        // lekin xozircha hamma originlarni qabul qilamiz ( credentials: true bilan)
+        callback(null, true);
+      }
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: [
@@ -17,8 +31,10 @@ async function bootstrap() {
       'Authorization',
       'X-Requested-With',
       'X-HTTP-Method-Override',
+      'x-auth-token',
     ],
-    exposedHeaders: ['Set-Cookie'],
+    exposedHeaders: ['Set-Cookie', 'x-auth-token'],
+    optionsSuccessStatus: 204,
   });
 
   // Debug uchun logger (Railway logs'da ko'rinadi)
