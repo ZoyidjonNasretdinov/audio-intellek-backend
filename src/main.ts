@@ -6,31 +6,25 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // 🔹 CORS ni yoqish (Web va Mobile uchun moslashtirilgan)
+  // 🔹 CORS ni yoqish (Eng keng qamrovli usul)
   app.enableCors({
     origin: (origin, callback) => {
-      // Mobile ilovalar uchun origin null bo'lishi mumkin
-      if (!origin) return callback(null, true);
-
-      const allowedOrigins = [
-        'http://localhost:8081',
-        'http://localhost:5173',
-        'http://localhost:3000',
-        'http://localhost:3001',
-      ];
-
-      const isAllowed =
-        allowedOrigins.includes(origin) || /\.railway\.app$/.test(origin);
-
-      if (isAllowed) {
-        callback(null, true);
-      } else {
-        // Boshqa barcha holatlarda ham ruxsat beramiz (dev rejimida xavfsizroq)
-        callback(null, true);
-      }
+      // Barcha kelayotgan origin'larga ruxsat beramiz
+      callback(null, true);
     },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
+    allowedHeaders: 'Content-Type, Accept, Authorization',
+  });
+
+  // Debug uchun logger (Railway logs'da ko'rinadi)
+  app.use((req, res, next) => {
+    if (req.header('Origin')) {
+      console.log(
+        `[CORS Request] Origin: ${req.header('Origin')}, Method: ${req.method}, Path: ${req.path}`,
+      );
+    }
+    next();
   });
 
   // Global validation
