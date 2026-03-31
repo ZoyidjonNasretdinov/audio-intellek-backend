@@ -13,7 +13,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const request = context.switchToHttp().getRequest();
     const path = request.url;
 
-    // Swagger yo'llarini ochiq qoldirish
     if (path.startsWith('/docs')) {
       return true;
     }

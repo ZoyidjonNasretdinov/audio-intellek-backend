@@ -11,7 +11,6 @@ export class QuizzesService {
   async saveQuiz(dto: SaveQuizDto) {
     const { bookId, questions } = dto;
 
-    // Upsert quiz for book
     return this.quizModel.findOneAndUpdate(
       { bookId },
       { questions },

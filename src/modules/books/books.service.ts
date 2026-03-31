@@ -14,18 +14,15 @@ export class BooksService {
     @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
   ) {}
 
-  // CATEGORIES
   async findAllCategories(): Promise<CategoryDocument[]> {
     return this.categoryModel.find().exec();
   }
 
-  // CREATE
   async create(dto: CreateBookDto): Promise<BookDocument> {
     const book = new this.bookModel(dto);
     return book.save();
   }
 
-  // READ ALL (with optional filters: category, grade, search)
   async findAll(
     category?: string,
     grade?: string,
@@ -43,14 +40,12 @@ export class BooksService {
     return this.bookModel.find(filter).exec();
   }
 
-  // READ ONE
   async findOne(id: string): Promise<BookDocument> {
     const book = await this.bookModel.findById(id).exec();
     if (!book) throw new NotFoundException(`Book with id "${id}" not found`);
     return book;
   }
 
-  // UPDATE
   async update(id: string, dto: UpdateBookDto): Promise<BookDocument> {
     const book = await this.bookModel
       .findByIdAndUpdate(id, dto, { new: true })
@@ -59,14 +54,12 @@ export class BooksService {
     return book;
   }
 
-  // DELETE
   async remove(id: string): Promise<{ message: string }> {
     const book = await this.bookModel.findByIdAndDelete(id).exec();
     if (!book) throw new NotFoundException(`Book with id "${id}" not found`);
     return { message: `Book "${book.title}" deleted successfully` };
   }
 
-  // STREAM AUDIO FROM GOOGLE DRIVE
   async streamAudio(id: string, res: any, range?: string) {
     try {
       const book = await this.findOne(id);
@@ -89,7 +82,7 @@ export class BooksService {
       if (range) headers['Range'] = range;
 
       if (!fileId) {
-        // Fallback for non-drive links
+        
         const response = await axios.get(url, {
           responseType: 'stream',
           headers,
@@ -115,7 +108,7 @@ export class BooksService {
       );
 
       if (contentType.includes('text/html')) {
-        // Peek at the first 10KB to find the confirmation code
+        
         let html = '';
         for await (const chunk of response.data) {
           html += chunk.toString();
@@ -162,7 +155,6 @@ export class BooksService {
         }
       }
 
-      // If it's already audio or we couldn't find a code, pipe the current stream
       if (response.status === 200 || response.status === 206) {
         return this.pipeAxiosResponse(response, res);
       }
@@ -180,7 +172,7 @@ export class BooksService {
   }
 
   private pipeAxiosResponse(response: any, res: any) {
-    // Forward relevant headers
+    
     const headersToForward = [
       'content-type',
       'content-length',
@@ -194,12 +186,10 @@ export class BooksService {
       }
     });
 
-    // Crucial for seeking: Accept-Ranges must be 'bytes'
     if (!res.getHeader('accept-ranges')) {
       res.setHeader('Accept-Ranges', 'bytes');
     }
 
-    // Ensure Content-Type is correct for audiobooks
     if (
       !res.getHeader('content-type') ||
       res.getHeader('content-type').includes('text/html')
@@ -207,7 +197,6 @@ export class BooksService {
       res.setHeader('Content-Type', 'audio/mpeg');
     }
 
-    // Pass the exact status code (e.g., 206 for partial content)
     res.status(response.status);
 
     response.data.pipe(res);

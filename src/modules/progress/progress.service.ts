@@ -12,7 +12,6 @@ export class ProgressService {
     @InjectModel(Activity.name) private activityModel: Model<ActivityDocument>,
   ) {}
 
-  // Progress saqlash / update
   async saveProgress(dto: SaveProgressDto) {
     const { userId, bookId, currentTime, duration } = dto;
     const today = new Date().toISOString().split('T')[0];
@@ -36,7 +35,6 @@ export class ProgressService {
       await newProgress.save();
     }
 
-    // Update daily activity
     if (diff > 0) {
       await this.activityModel.updateOne(
         { userId, date: today },
@@ -48,17 +46,14 @@ export class ProgressService {
     return { success: true };
   }
 
-  // Foydalanuvchi progresslari
   async getUserProgress(userId: string) {
     return this.progressModel.find({ userId }).exec();
   }
 
-  // Bitta kitob bo‘yicha progress
   async getSingleProgress(userId: string, bookId: string) {
     return this.progressModel.findOne({ userId, bookId }).exec();
   }
 
-  // Foydalanuvchi statistikasi
   async getUserStats(userId: string) {
     const progresses = await this.progressModel.find({ userId }).exec();
     const totalBooks = progresses.length;
@@ -75,7 +70,6 @@ export class ProgressService {
     return { totalBooks, avgProgress: Math.floor(avgProgress) };
   }
 
-  // Haftalik faollik (7 kunlik)
   async getWeeklyActivity(userId: string) {
     const today = new Date();
     const last7Days: string[] = [];
@@ -93,7 +87,6 @@ export class ProgressService {
       })
       .exec();
 
-    // Map to result format
     const results = last7Days.map((date) => {
       const act = activities.find((a) => a.date === date);
       return {
@@ -106,17 +99,16 @@ export class ProgressService {
     return results;
   }
 
-  // Quiz natijasini saqlash
   async saveQuizScore(userId: string, bookId: string, score: number) {
     const existing = await this.progressModel.findOne({ userId, bookId });
     if (existing) {
-      // Faqat eng yuqori natijani saqlaymiz
+      
       if (score > (existing.quizScore || 0)) {
         existing.quizScore = score;
         await existing.save();
       }
     } else {
-      // Progress hali bo'lmasa, yangi yaratish (aslida playerdan keyin bo'lishi kerak, lekin ehtiyot shart)
+      
       const newProgress = new this.progressModel({
         userId,
         bookId,

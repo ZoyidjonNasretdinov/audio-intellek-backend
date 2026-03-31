@@ -34,8 +34,6 @@ export class AdminService {
     @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
   ) {}
 
-  // ─── DASHBOARD ───────────────────────────────────────────────────────────────
-
   async getDashboardStats() {
     try {
       const todayStr = new Date().toISOString().split('T')[0];
@@ -92,7 +90,6 @@ export class AdminService {
       const averageListeningHours =
         totalActivityCount > 0 ? totalDuration / totalActivityCount / 3600 : 0;
 
-      // Build category distribution with percentages
       const totalCatBooks = categoryStats.reduce(
         (s: number, c: any) => s + c.count,
         0,
@@ -104,7 +101,6 @@ export class AdminService {
           totalCatBooks > 0 ? Math.round((c.count / totalCatBooks) * 100) : 0,
       }));
 
-      // Enrich popular books with real data
       const popularBooksEnriched = await Promise.all(
         popularBooks.map(async (pb) => {
           if (!pb._id || !isValidObjectId(pb._id)) return null;
@@ -116,10 +112,8 @@ export class AdminService {
         }),
       );
 
-      // Monthly activity for current year (for chart)
       const monthlyStats = await this.getMonthlyStats();
 
-      // Gender distribution
       const genderStats = await this.userModel.aggregate([
         { $group: { _id: '$gender', count: { $sum: 1 } } },
       ]);
@@ -214,8 +208,6 @@ export class AdminService {
     return result;
   }
 
-  // ─── USER CRUD ────────────────────────────────────────────────────────────────
-
   async getAllUsers(
     page = 1,
     limit = 20,
@@ -286,7 +278,7 @@ export class AdminService {
   async deleteUser(id: string) {
     const user = await this.userModel.findByIdAndDelete(id);
     if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
-    // Clean up user data
+    
     await Promise.all([
       this.progressModel.deleteMany({ userId: id }),
       this.activityModel.deleteMany({ userId: id }),
@@ -324,8 +316,6 @@ export class AdminService {
       recentActivity,
     };
   }
-
-  // ─── CONTENT (BOOKS) CRUD ─────────────────────────────────────────────────────
 
   async getAllBooks(
     page = 1,
@@ -408,8 +398,6 @@ export class AdminService {
     };
   }
 
-  // ─── ANALYTICS ───────────────────────────────────────────────────────────────
-
   async getAnalytics(period: 'week' | 'month' | 'year' = 'month') {
     try {
       const now = new Date();
@@ -437,7 +425,7 @@ export class AdminService {
         newUsersCount,
         activeUsersCount,
       ] = await Promise.all([
-        // Daily activity within period
+        
         this.activityModel.aggregate([
           { $match: { date: { $gte: startDate, $lte: todayStr } } },
           {
@@ -457,7 +445,6 @@ export class AdminService {
           { $sort: { date: 1 } },
         ]),
 
-        // Top listened books
         this.progressModel.aggregate([
           {
             $group: {
@@ -470,7 +457,6 @@ export class AdminService {
           { $limit: 10 },
         ]),
 
-        // Most active users
         this.activityModel.aggregate([
           { $match: { date: { $gte: startDate } } },
           {
@@ -484,24 +470,20 @@ export class AdminService {
           { $limit: 10 },
         ]),
 
-        // Users by grade
         this.userModel.aggregate([
           { $group: { _id: '$grade', count: { $sum: 1 } } },
           { $sort: { count: -1 } },
         ]),
 
-        // New users in period
         this.userModel.countDocuments({
           createdAt: { $gte: new Date(startDate) },
         }),
 
-        // Active users in period
         this.activityModel.distinct('userId', {
           date: { $gte: startDate },
         }),
       ]);
 
-      // Enrich top books with book info
       const topBooksEnriched = await Promise.all(
         topBooks.map(async (tb) => {
           if (!tb._id || !isValidObjectId(tb._id)) return null;
@@ -517,7 +499,6 @@ export class AdminService {
         }),
       );
 
-      // Enrich top users with user info
       const topUsersEnriched = await Promise.all(
         topUsers.map(async (tu) => {
           if (!tu._id || !isValidObjectId(tu._id)) return null;
@@ -534,9 +515,8 @@ export class AdminService {
         }),
       );
 
-      // ─── Gender-based top books ───────────────────────────────────────────
       const getTopBooksByGender = async (genderValue: string) => {
-        // Get user IDs of given gender
+        
         const genderUsers = await this.userModel
           .find({ gender: genderValue })
           .select('_id')
@@ -577,8 +557,7 @@ export class AdminService {
             { $group: { _id: '$gender', count: { $sum: 1 } } },
           ]),
         ]);
-      // ─────────────────────────────────────────────────────────────────────
-
+      
       return {
         period,
         summary: {
@@ -609,8 +588,6 @@ export class AdminService {
     }
   }
 
-  // ─── SETTINGS ─────────────────────────────────────────────────────────────────
-
   async getSettings(): Promise<SettingsDocument> {
     let settings = (await this.settingsModel
       .findOne()
@@ -629,8 +606,6 @@ export class AdminService {
     Object.assign(settings, dto);
     return settings.save() as unknown as SettingsDocument;
   }
-
-  // ─── CATEGORIES ─────────────────────────────────────────────────────────────
 
   async getAllCategories() {
     return this.categoryModel.find().sort({ name: 1 }).lean();
@@ -669,8 +644,6 @@ export class AdminService {
     if (!category) throw new NotFoundException('Kategoriya topilmadi');
     return { message: 'Kategoriya oʻchirildi' };
   }
-
-  // ─── SEEDING ───────────────────────────────────────────────────────────────────
 
   async seedDemoData() {
     console.log('--- SEEDING STARTED ---');
@@ -777,7 +750,6 @@ export class AdminService {
         }
         books.push(book);
 
-        // Ensure category exists
         const catName = b.category;
         const slug = catName
           .toLowerCase()
@@ -800,7 +772,7 @@ export class AdminService {
 
         for (const book of selectedBooks) {
           const bookIdStr = book._id.toString();
-          // Use findOneAndUpdate with upsert for Progress
+          
           await this.progressModel.findOneAndUpdate(
             { userId: userIdStr, bookId: bookIdStr },
             {
@@ -815,20 +787,18 @@ export class AdminService {
           );
         }
 
-        // Generate activity for last 45 days
         for (let d = 0; d < 20; d++) {
           const activityDate = new Date(now);
           activityDate.setDate(now.getDate() - Math.floor(Math.random() * 45));
           const dateStr = activityDate.toISOString().split('T')[0];
 
-          // Use findOneAndUpdate with upsert for Activity
           await this.activityModel.findOneAndUpdate(
             { userId: userIdStr, date: dateStr },
             {
               $setOnInsert: {
                 userId: userIdStr,
                 date: dateStr,
-                duration: 1800 + Math.random() * 5400, // 30-120 mins
+                duration: 1800 + Math.random() * 5400, 
               },
             },
             { upsert: true },

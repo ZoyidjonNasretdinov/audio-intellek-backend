@@ -6,10 +6,9 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // 🔹 CORS sozlamalari (Admin, Vercel va mobil ilovalar uchun)
   app.enableCors({
     origin: (origin, callback) => {
-      // Localhost va Vercel originlariga ruxsat beramiz
+      
       const allowedOrigins = [
         /^http:\/\/localhost(:\d+)?$/,
         /^https:\/\/.*\.vercel\.app$/,
@@ -18,8 +17,7 @@ async function bootstrap() {
       if (!origin || allowedOrigins.some((regex) => regex.test(origin))) {
         callback(null, true);
       } else {
-        // Xavfsizlik uchun faqat ruxsat berilganlarni qoldirish ham mumkin,
-        // lekin xozircha hamma originlarni qabul qilamiz ( credentials: true bilan)
+        
         callback(null, true);
       }
     },
@@ -37,7 +35,6 @@ async function bootstrap() {
     optionsSuccessStatus: 204,
   });
 
-  // Debug uchun logger (Railway logs'da ko'rinadi)
   app.use((req, res, next) => {
     if (req.header('Origin')) {
       console.log(
@@ -47,7 +44,6 @@ async function bootstrap() {
     next();
   });
 
-  // Global validation
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -55,12 +51,11 @@ async function bootstrap() {
     }),
   );
 
-  // Swagger config
   const config = new DocumentBuilder()
     .setTitle('Adabiyot API')
     .setDescription('Adabiyot o‘quv platformasi backend hujjatlari')
     .setVersion('1.0')
-    .addBearerAuth() // JWT uchun
+    .addBearerAuth() 
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

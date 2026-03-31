@@ -17,23 +17,18 @@ export class Book {
   @Prop()
   coverImage: string;
 
-  // Category / subject (e.g. "Matematika", "Ona-tili")
   @Prop()
   category: string;
 
-  // Grade level (e.g. "10-sinf")
   @Prop()
   grade: string;
 
-  // Direct URL to the PDF file (cloud storage link)
   @Prop({ required: true })
   pdfUrl: string;
 
-  // Direct URL to the audio file (cloud storage link)
   @Prop({ required: true })
   audioUrl: string;
 
-  // Duration in seconds (total audio length)
   @Prop({ default: 0 })
   duration: number;
 }

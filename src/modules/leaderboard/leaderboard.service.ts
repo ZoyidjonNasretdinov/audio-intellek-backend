@@ -70,7 +70,6 @@ export class LeaderboardService {
       pipeline.push({ $match: { 'user.grade': grade } });
     }
 
-    // Score calculation: 1 pt per sec + 600 per book + 100 per quiz point
     pipeline.push({
       $addFields: {
         score: {

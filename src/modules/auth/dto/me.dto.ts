@@ -1,4 +1,4 @@
-// auth/dto/me.dto.ts
+
 import { ApiProperty } from '@nestjs/swagger';
 
 export class MeDto {
@@ -11,7 +11,4 @@ export class MeDto {
   @ApiProperty({ example: 'USER', description: 'User role' })
   role: string;
 
-  // agar boshqa maydonlar kerak bo‘lsa qo‘shish mumkin
-  // @ApiProperty({ example: 'John Doe', description: 'User name' })
-  // name: string;
 }

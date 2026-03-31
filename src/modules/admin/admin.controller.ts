@@ -33,8 +33,6 @@ import { Public } from '../../common/decorators/public.decorator';
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
-  // --- DASHBOARD ---
-
   @Get('dashboard')
   @ApiOperation({
     summary: 'Dashboard statistikasi',
@@ -45,8 +43,6 @@ export class AdminController {
   getDashboardStats() {
     return this.adminService.getDashboardStats();
   }
-
-  // --- USERS ---
 
   @Get('users')
   @ApiOperation({
@@ -106,8 +102,6 @@ export class AdminController {
   deleteUser(@Param('id') id: string) {
     return this.adminService.deleteUser(id);
   }
-
-  // --- CONTENT (BOOKS) ---
 
   @Get('books')
   @ApiOperation({
@@ -171,8 +165,6 @@ export class AdminController {
     return this.adminService.deleteBook(id);
   }
 
-  // --- ANALYTICS ---
-
   @Get('analytics')
   @ApiOperation({
     summary: 'Analitika - kunlik faollik, top kitoblar, top foydalanuvchilar',
@@ -188,8 +180,6 @@ export class AdminController {
   getAnalytics(@Query('period') period: 'week' | 'month' | 'year' = 'month') {
     return this.adminService.getAnalytics(period);
   }
-
-  // --- SETTINGS ---
 
   @Get('settings')
   @ApiOperation({ summary: 'Ilova sozlamalarini olish' })
@@ -218,8 +208,6 @@ export class AdminController {
   fixGenders() {
     return this.adminService.fixGenders();
   }
-
-  // --- CATEGORIES ---
 
   @Get('categories')
   @ApiOperation({ summary: 'Barcha kategoriyalarni olish' })

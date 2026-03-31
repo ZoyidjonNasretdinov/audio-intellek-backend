@@ -56,7 +56,6 @@ export class AuthService {
     });
   }
 
-  // GENERATE ACCESS & REFRESH TOKENS + RETURN USER
   private async generateTokensWithUser(user: User) {
     const payload: JwtPayload = {
       sub: user._id,
@@ -81,7 +80,7 @@ export class AuthService {
         _id: user._id,
         phone: user.phone,
         role: user.role,
-        // agar boshqa maydonlar kerak bo‘lsa qo‘shing
+        
       },
     };
   }
