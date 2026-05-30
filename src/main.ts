@@ -11,6 +11,7 @@ async function bootstrap() {
       
       const allowedOrigins = [
         /^http:\/\/localhost(:\d+)?$/,
+        /^http:\/\/192\.168\.\d+\.\d+(:\d+)?$/,
         /^https:\/\/.*\.vercel\.app$/,
         /^https:\/\/.*\.railway\.app$/,
       ];

@@ -11,7 +11,7 @@ export class User {
   @Prop({ required: true, unique: true })
   phone: string;
 
-  @Prop({ required: true })
+  @Prop({ default: "Noma'lum" })
   grade: string;
 
   @Prop({ required: true, select: false })
@@ -25,6 +25,9 @@ export class User {
 
   @Prop({ default: 'Erkak' })
   gender: string;
+
+  @Prop()
+  avatarUrl?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

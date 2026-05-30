@@ -1,4 +1,3 @@
-
 import { ApiProperty } from '@nestjs/swagger';
 
 export class MeDto {
@@ -8,7 +7,18 @@ export class MeDto {
   @ApiProperty({ example: '+998700134501', description: 'User phone number' })
   phone: string;
 
+  @ApiProperty({
+    example: 'Zoyidjon Nasretdinov',
+    description: 'User full name',
+  })
+  fullName: string;
+
+  @ApiProperty({ example: '9 - sinf', description: 'User grade' })
+  grade: string;
+
+  @ApiProperty({ example: 'Erkak', description: 'User gender' })
+  gender: string;
+
   @ApiProperty({ example: 'USER', description: 'User role' })
   role: string;
-
 }

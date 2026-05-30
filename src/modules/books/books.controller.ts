@@ -18,6 +18,9 @@ import {
   ApiQuery,
   ApiParam,
 } from '@nestjs/swagger';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AdminGuard } from '../../common/guards/admin.guard';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
@@ -25,6 +28,7 @@ import { Public } from '../../common/decorators/public.decorator';
 
 @ApiTags('Books')
 @Controller('books')
+@UseGuards(JwtAuthGuard, AdminGuard)
 export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 

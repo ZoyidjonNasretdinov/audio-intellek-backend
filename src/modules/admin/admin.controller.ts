@@ -24,11 +24,13 @@ import { UpdateSettingsDto } from './dto/update-settings.dto';
 import { CreateBookDto } from '../books/dto/create-book.dto';
 import { UpdateBookDto } from '../books/dto/update-book.dto';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
-import { Public } from '../../common/decorators/public.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AdminGuard } from '../../common/guards/admin.guard';
+import { UseGuards } from '@nestjs/common';
 
 @ApiTags('Admin')
 @ApiBearerAuth()
-@Public()
+@UseGuards(JwtAuthGuard, AdminGuard)
 @Controller('admin')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}

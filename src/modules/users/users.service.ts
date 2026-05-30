@@ -43,6 +43,13 @@ export class UsersService {
     return this.userModel.find().select('-password -refreshToken').lean();
   }
 
+  async update(userId: string, data: Partial<User>) {
+    return this.userModel
+      .findByIdAndUpdate(userId, data, { new: true })
+      .select('-password -refreshToken')
+      .lean();
+  }
+
   async updateRefreshToken(userId: string, refreshToken: string) {
     return this.userModel.findByIdAndUpdate(userId, {
       refreshToken,

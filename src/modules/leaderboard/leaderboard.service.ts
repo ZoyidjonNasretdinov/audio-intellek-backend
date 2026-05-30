@@ -67,7 +67,17 @@ export class LeaderboardService {
     ];
 
     if (grade) {
-      pipeline.push({ $match: { 'user.grade': grade } });
+      const matchNumber = grade.match(/\d+/);
+      const gradeNum = matchNumber ? matchNumber[0] : grade;
+      pipeline.push({ 
+        $match: { 
+          $or: [
+            { 'user.grade': grade },
+            { 'user.grade': gradeNum },
+            { 'user.grade': `${gradeNum} - sinf` }
+          ] 
+        } 
+      });
     }
 
     pipeline.push({

@@ -81,6 +81,41 @@ export class BooksService {
       };
       if (range) headers['Range'] = range;
 
+      if (url.startsWith('/uploads/')) {
+        const fs = require('fs');
+        const path = require('path');
+        const filePath = path.join(process.cwd(), 'public', url);
+        
+        if (!fs.existsSync(filePath)) {
+          throw new NotFoundException('Fayl topilmadi');
+        }
+
+        const stat = fs.statSync(filePath);
+        const fileSize = stat.size;
+
+        if (range) {
+          const parts = range.replace(/bytes=/, "").split("-");
+          const start = parseInt(parts[0], 10);
+          const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+          const chunksize = (end - start) + 1;
+          const file = fs.createReadStream(filePath, {start, end});
+          
+          res.writeHead(206, {
+            'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+            'Accept-Ranges': 'bytes',
+            'Content-Length': chunksize,
+            'Content-Type': 'audio/mpeg',
+          });
+          return file.pipe(res);
+        } else {
+          res.writeHead(200, {
+            'Content-Length': fileSize,
+            'Content-Type': 'audio/mpeg',
+          });
+          return fs.createReadStream(filePath).pipe(res);
+        }
+      }
+
       if (!fileId) {
         
         const response = await axios.get(url, {

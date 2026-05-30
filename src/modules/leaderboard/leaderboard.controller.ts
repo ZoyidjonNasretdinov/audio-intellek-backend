@@ -24,9 +24,17 @@ export class LeaderboardController {
   async getMyRank(@Param('userId') userId: string) {
     const entry = await this.leaderboardService.getMyRank(userId);
     if (!entry) {
-      throw new NotFoundException(
-        'User not found in leaderboard. Start listening to books first!',
-      );
+      // Foydalanuvchi hali kitob eshitmagan bo'lsa, xato o'rniga default qaytaramiz
+      return {
+        rank: 0,
+        userId,
+        fullName: 'Siz',
+        gender: 'Erkak',
+        grade: '',
+        totalListeningTime: 0,
+        booksCompleted: 0,
+        score: 0
+      };
     }
     return entry;
   }

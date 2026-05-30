@@ -23,18 +23,4 @@ export class RegisterDto {
   @MinLength(8)
   password: string;
 
-  @ApiProperty({
-    example: '9 - sinf',
-    description: 'O‘quvchi sinfi yoki darajasi',
-  })
-  @IsString()
-  grade: string;
-
-  @ApiProperty({
-    example: 'Erkak',
-    description: 'Foydalanuvchi jinsi',
-    enum: ['Erkak', 'Ayol'],
-  })
-  @IsString()
-  gender: string;
 }

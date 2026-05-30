@@ -1,9 +1,12 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Patch, Body, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+
 @ApiTags('Users')
 @Controller('users')
+@UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -21,5 +24,11 @@ export class UsersController {
   @Get(':id')
   async getUserById(@Param('id') id: string) {
     return this.usersService.findById(id);
+  }
+
+  @ApiOperation({ summary: 'Update user profile' })
+  @Patch(':id')
+  async update(@Param('id') id: string, @Body() data: any) {
+    return this.usersService.update(id, data);
   }
 }

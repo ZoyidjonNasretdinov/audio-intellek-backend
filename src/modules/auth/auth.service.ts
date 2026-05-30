@@ -17,9 +17,12 @@ interface JwtPayload {
 interface User {
   _id: string;
   phone: string;
-  password: string;
+  fullName: string;
+  grade: string;
+  gender: string;
   role: string;
 }
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -38,7 +41,7 @@ export class AuthService {
     });
 
     return this.generateTokensWithUser({
-      ...user,
+      ...user.toObject(),
       _id: user._id.toString(),
     });
   }
@@ -51,7 +54,7 @@ export class AuthService {
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
     return this.generateTokensWithUser({
-      ...user,
+      ...user.toObject(),
       _id: user._id.toString(),
     });
   }
@@ -79,8 +82,10 @@ export class AuthService {
       user: {
         _id: user._id,
         phone: user.phone,
+        fullName: user.fullName,
+        grade: user.grade,
+        gender: user.gender,
         role: user.role,
-        
       },
     };
   }

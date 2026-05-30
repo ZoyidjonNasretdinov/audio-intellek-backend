@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -14,11 +16,17 @@ import { AdminModule } from './modules/admin/admin.module';
 import { LeaderboardModule } from './modules/leaderboard/leaderboard.module';
 import { BooksModule } from './modules/books/books.module';
 import { QuizzesModule } from './modules/quizzes/quizzes.module';
+import { UploadModule } from './modules/upload/upload.module';
+import { EventsModule } from './modules/events/events.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
     }),
 
     MongooseModule.forRootAsync({
@@ -38,6 +46,8 @@ import { QuizzesModule } from './modules/quizzes/quizzes.module';
     LeaderboardModule,
     BooksModule,
     QuizzesModule,
+    UploadModule,
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
