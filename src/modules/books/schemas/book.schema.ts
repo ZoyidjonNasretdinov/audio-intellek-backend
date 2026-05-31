@@ -20,8 +20,8 @@ export class Book {
   @Prop()
   category: string;
 
-  @Prop()
-  grade: string;
+  @Prop({ type: [String], default: [] })
+  grade: string[];
 
   @Prop({ required: true })
   pdfUrl: string;

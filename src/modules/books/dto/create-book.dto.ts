@@ -34,10 +34,9 @@ export class CreateBookDto {
   @IsString()
   category?: string;
 
-  @ApiPropertyOptional({ example: '10-sinf', description: 'Sinf' })
+  @ApiPropertyOptional({ example: ['10-sinf', '11-sinf'], description: 'Sinflar' })
   @IsOptional()
-  @IsString()
-  grade?: string;
+  grade?: string[];
 
   @ApiProperty({
     example: 'https://example.com/book.pdf',

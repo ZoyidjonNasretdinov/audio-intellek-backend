@@ -16,6 +16,7 @@ export interface LeaderboardEntry {
   totalListeningTime: number;
   booksCompleted: number;
   score: number;
+  avatarUrl?: string;
 }
 
 @Injectable()
@@ -110,6 +111,7 @@ export class LeaderboardService {
       totalListeningTime: r.totalListeningTime,
       booksCompleted: r.booksCompleted,
       score: r.score,
+      avatarUrl: r.user.avatarUrl,
     }));
   }
 
@@ -123,7 +125,15 @@ export class LeaderboardService {
   }
 
   async getMyRank(userId: string): Promise<LeaderboardEntry | null> {
-    const ranked = await this.buildRankedList();
-    return ranked.find((e) => e.userId === userId) ?? null;
+    try {
+      const user = await this.usersService.findById(userId);
+      const grade = user?.grade || '9 - sinf';
+      const ranked = await this.buildRankedList(grade);
+      return ranked.find((e) => e.userId === userId) ?? null;
+    } catch (e) {
+      // User might not exist or other error, fallback to global
+      const ranked = await this.buildRankedList();
+      return ranked.find((e) => e.userId === userId) ?? null;
+    }
   }
 }

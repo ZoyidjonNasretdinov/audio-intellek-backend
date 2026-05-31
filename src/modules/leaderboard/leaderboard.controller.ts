@@ -33,7 +33,8 @@ export class LeaderboardController {
         grade: '',
         totalListeningTime: 0,
         booksCompleted: 0,
-        score: 0
+        score: 0,
+        avatarUrl: '',
       };
     }
     return entry;

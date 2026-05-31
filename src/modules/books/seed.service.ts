@@ -27,7 +27,7 @@ export class SeedService implements OnModuleInit {
         description:
           "O'zbek adabiyotining ilk romani. Kumush va Otabekning fojiali muhabbati haqida.",
         category: "O'zbek Adabiyoti",
-        grade: '9 - sinf',
+        grade: ['9 - sinf'],
         coverImage: 'https://kitobxon.com/img_knigi/74.jpg',
         pdfUrl: 'https://example.com/otkan-kunlar.pdf',
         audioUrl: 'https://example.com/otkan-kunlar.mp3',
@@ -38,7 +38,7 @@ export class SeedService implements OnModuleInit {
         author: "Xudoyberdi To'xtaboyev",
         description: 'Hoshimjonning sarguzashtlari haqida qiziqarli hikoya.',
         category: 'Sarguzasht',
-        grade: '5 - sinf',
+        grade: ['5 - sinf'],
         coverImage: 'https://kitobxon.com/img_knigi/414.jpg',
         pdfUrl: 'https://example.com/sariq-dev.pdf',
         audioUrl: 'https://example.com/sariq-dev.mp3',
@@ -50,7 +50,7 @@ export class SeedService implements OnModuleInit {
         description:
           'Dunyoga mashhur detektiv Sherlok Xolms va doktor Vatsonning sarguzashtlari.',
         category: 'Detektiv',
-        grade: '10 - sinf',
+        grade: ['10 - sinf'],
         coverImage: 'https://kitobxon.com/img_knigi/2068.jpg',
         pdfUrl: 'https://example.com/sherlock.pdf',
         audioUrl: 'https://example.com/sherlock.mp3',
@@ -62,7 +62,7 @@ export class SeedService implements OnModuleInit {
         description:
           "Toshkent va Qo'qon xonligidagi tarixiy voqealar asosida yozilgan roman.",
         category: "O'zbek Adabiyoti",
-        grade: '11 - sinf',
+        grade: ['11 - sinf'],
         coverImage: 'https://kitobxon.com/img_knigi/75.jpg',
         pdfUrl: 'https://example.com/mehrobdan-chayon.pdf',
         audioUrl: 'https://example.com/mehrobdan-chayon.mp3',

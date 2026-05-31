@@ -63,7 +63,7 @@ export class BooksService {
   async streamAudio(id: string, res: any, range?: string) {
     try {
       const book = await this.findOne(id);
-      const url = book.audioUrl;
+      let url = book.audioUrl;
 
       if (!url) {
         throw new NotFoundException('Audio URL not found for this book');
@@ -73,6 +73,8 @@ export class BooksService {
       if (url && url.includes('drive.google.com')) {
         const fileIdMatch = url.match(/(?:id=|\/d\/|open\?id=)([-\w]{25,})/);
         if (fileIdMatch) fileId = fileIdMatch[1];
+      } else if (url && url.includes('res.cloudinary.com')) {
+        url = url.replace(/\.mp4$/, '.mp3');
       }
 
       const headers: Record<string, string> = {
