@@ -23,10 +23,10 @@ export class Book {
   @Prop({ type: [String], default: [] })
   grade: string[];
 
-  @Prop({ required: true })
+  @Prop({ default: '' })
   pdfUrl: string;
 
-  @Prop({ required: true })
+  @Prop({ default: '' })
   audioUrl: string;
 
   @Prop({ default: 0 })
